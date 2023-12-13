@@ -25,7 +25,7 @@ SocketServer.on('connection', socket => {
     socket.on("message", data => {
         const message: string = data
         console.log("data:", message)
-        socket?.emit("message", message)
+        SocketServer?.emit("received_message", message)
     })
 })
 

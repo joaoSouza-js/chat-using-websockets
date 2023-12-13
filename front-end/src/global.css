@@ -1,6 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap');
+
  
 
 @layer base {
@@ -50,3 +54,12 @@
     }
   }
   
+body {
+  background-color: hsl( 222.2 84% 4.9%);
+  font-family: 'Poppins', sans-serif;
+}
+
+input, button {
+  font-family: 'Poppins', sans-serif;
+
+}
