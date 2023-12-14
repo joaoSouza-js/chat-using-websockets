@@ -1,26 +1,30 @@
+import * as z from "zod"
+import { useForm } from "react-hook-form"
+import {useNavigate} from "react-router-dom"
+import { zodResolver } from "@hookform/resolvers/zod"
+
+import { useAuth } from "@/hooks/useAuth";
+import { AppError } from "@/services/appError";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import * as z from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-
 
 const newUserSchema = z.object({
     email: z.string({ required_error: "Email é obrigatório" }).email("Email está inválido"),
-    userName: z.string({required_error: "Nome de usuário é obrigatório"})
+    username: z.string({ required_error: "Nome de usuário é obrigatório" })
         .min(4, "O nome deve possuir mais de 4 letras")
-        .refine( username => username.trim().length >= 4, "o nome deve possuir mais de 4 letras")
+        .refine(username => username.trim().length >= 4, "o nome deve possuir mais de 4 letras")
         .transform(username => username.trim())
     ,
-    password: z.string({ required_error: "Senha é obrigatória" }).min(6,"Senha deve ter pelo mes 6 caracteres")
+    password: z.string({ required_error: "Senha é obrigatória" }).min(6, "Senha deve ter pelo mes 6 caracteres")
 })
 
 type newUserSchemaData = z.input<typeof newUserSchema>
 
-
-
 export function SignUp() {
+    const { signUp } = useAuth()
+    const navigation = useNavigate()
     const { formState, handleSubmit, register } = useForm<newUserSchemaData>({
         resolver: zodResolver(newUserSchema)
     })
@@ -28,6 +32,20 @@ export function SignUp() {
     const { errors, isSubmitting } = formState
 
     async function handleRegisterUser(form: newUserSchemaData) {
+        try {
+            await signUp({
+                email: form.email,
+                password: form.password,
+                username: form.username
+            })
+            navigation("/home")
+        } catch (error) {
+            const isAppError = error instanceof AppError
+            const errorMessage = isAppError ? error.error : "Algo de errado com o servidor"
+            window.alert(errorMessage)
+        }
+
+
         console.log(form)
     }
     return (
@@ -50,29 +68,29 @@ export function SignUp() {
 
                                 />
                                 {
-                                        errors.email?.message && (
-                                            <span className="text-destructive text-xs  font-semibold">
-                                                {errors.email.message}
-                                            </span>
-                                        )
-                                    }
+                                    errors.email?.message && (
+                                        <span className="text-destructive text-xs  font-medium">
+                                            {errors.email.message}
+                                        </span>
+                                    )
+                                }
 
                             </label>
                             <label className="flex-col ">
                                 <span className="text-sm text-muted-foreground inline-block font-semibold">Usuário</span>
                                 <Input
                                     className="mt-1"
-                                    {...register("userName")}
+                                    {...register("username")}
                                     placeholder="Digite o seu Nome de usuário"
 
                                 />
-                                    {
-                                        errors.userName?.message && (
-                                            <span className="text-destructive text-xs  font-semibold">
-                                                {errors.userName.message}
-                                            </span>
-                                        )
-                                    }
+                                {
+                                    errors.username?.message && (
+                                        <span className="text-destructive text-xs  font-medium">
+                                            {errors.username.message}
+                                        </span>
+                                    )
+                                }
 
                             </label>
                             <label className="flex-col ">
@@ -84,19 +102,25 @@ export function SignUp() {
 
                                 />
                                 {
-                                        errors.password?.message && (
-                                            <span className="text-destructive text-xs  font-semibold">
-                                                {errors.password.message}
-                                            </span>
-                                        )
-                                    }
+                                    errors.password?.message && (
+                                        <span className="text-destructive text-xs  font-medium">
+                                            {errors.password.message}
+                                        </span>
+                                    )
+                                }
 
                             </label>
 
                         </div>
 
-                        <div className="flex flex-col gap-1 mt-4">
-                            <Button type="submit">
+                        <div
+                            className="flex flex-col gap-1 mt-4"
+                        >
+                            <Button
+
+                                disabled={isSubmitting}
+                                type="submit"
+                            >
                                 Criar
                             </Button>
                         </div>

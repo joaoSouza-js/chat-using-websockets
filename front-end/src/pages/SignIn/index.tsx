@@ -1,20 +1,28 @@
-import { Button } from "@/components/ui/button";
+import * as z from "zod"
+import { Link } from "react-router-dom"
+import { useForm } from "react-hook-form"
+import { useNavigate } from "react-router-dom";
+import { zodResolver } from "@hookform/resolvers/zod"
+
+import { AppError } from "@/services/appError";
+import { useAuth } from "@/hooks/useAuth";
+
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom"
-import * as z from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { Button } from "@/components/ui/button";
 
 
 const SignInSchema = z.object({
     email: z.string({ required_error: "Email é obrigatório" }).email("Email está inválido"),
-    password: z.string({ required_error: "Senha é obrigatória" }).min(1,"Senha é obrigatória")
+    password: z.string({ required_error: "Senha é obrigatória" }).min(1, "Senha é obrigatória")
 })
 
 type SignInSchemaData = z.input<typeof SignInSchema>
 
 export function SignIn() {
+    const {signIn} = useAuth()
+    const navigate = useNavigate()
+
     const { formState, handleSubmit, register } = useForm<SignInSchemaData>({
         resolver: zodResolver(SignInSchema)
     })
@@ -22,9 +30,18 @@ export function SignIn() {
     const { errors, isSubmitting } = formState
 
     async function handleRegisterUser(form: SignInSchemaData) {
-        console.log(form)
+        try {
+            await signIn({
+                email: form.email,
+                password: form.password
+            })
+            navigate("/home")
+        } catch (error) {
+            const isAppError = error instanceof AppError
+            const errorMessage = isAppError ? error.error : "error no servidor"
+            window.alert(errorMessage)
+        }
     }
-
 
     return (
         <div className="min-h-screen flex justify-center items-center">
@@ -77,14 +94,14 @@ export function SignIn() {
 
                         <div className="flex flex-col gap-2 mt-4">
 
-                            <Button 
-                                type="submit" 
+                            <Button
+                                type="submit"
                                 disabled={isSubmitting}
                             >
                                 Entrar
                             </Button>
 
-                            <Link 
+                            <Link
                                 to={"/"}
                                 className="text-sm text-gray-700 block text-center"
                             >
@@ -98,7 +115,6 @@ export function SignIn() {
                             </Button>
 
                         </div>
-
 
                     </div>
                 </Card>
