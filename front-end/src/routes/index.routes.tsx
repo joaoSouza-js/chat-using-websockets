@@ -1,3 +1,4 @@
+import { DashboardMessages } from '@/components/dashboard';
 import { Home } from '@/pages/Home';
 import { SignIn } from '@/pages/SignIn';
 import { SignUp } from '@/pages/SignUp';
@@ -9,7 +10,9 @@ export function Router() {
             <Routes>
                 <Route path="/" element={<SignIn />} />
                 <Route path="/signUp" element={<SignUp />} />
-                <Route path="/home" element={<Home />} />
+                <Route path='/home' element={<DashboardMessages/>}>
+                    <Route path='messages/:friendId'element={<Home />} />
+                </Route>
             </Routes>
         </BrowserRouter>
 

@@ -1,5 +1,6 @@
+import { GET_USER_IN_LOCAL_STORAGE, SAVE_USER_IN_LOCAL_STORAGE } from "@/Storage/user";
 import { api } from "@/services/axios"
-import { ReactNode, createContext, useState } from "react"
+import { ReactNode, createContext, useEffect, useState } from "react"
 
 
 type SignInResponse = {
@@ -41,6 +42,14 @@ export const AuthContext = createContext({} as AuthContextProps)
 
 export function AuthContextProvider({ children }: AuthContextProviderProps) {
     const [user, setUser] = useState<USER_DTO | null>(null)
+    function saveUserInLocalStorage(userInformation:USER_DTO){
+        SAVE_USER_IN_LOCAL_STORAGE({
+            email: userInformation.email,
+            id: userInformation.id,
+            username: userInformation.username
+        })
+    }
+   
 
     async function signIn(userCredentials: signInProps) {
         try {
@@ -55,10 +64,17 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
                 username: userInformation.username
             })
 
+            saveUserInLocalStorage(userInformation)
+
         } catch (error) {
             throw error
         }
 
+    }
+
+    function fetchUserInLocalStorage(){
+        const userInLocalStorage = GET_USER_IN_LOCAL_STORAGE()
+        setUser(userInLocalStorage)
     }
 
     async function signUp(userCredentials: signUpProps) {
@@ -79,6 +95,10 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
         }
 
     }
+
+    useEffect(() => {
+            fetchUserInLocalStorage()
+    }, [])
 
     return (
         <AuthContext.Provider
