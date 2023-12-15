@@ -96,7 +96,7 @@ app.post("/signUp", async (request, response) => {
 
 })
 
-    app.post("/signIn", async (request, response) => {
+app.post("/signIn", async (request, response) => {
     const responseBodySchema = z.object({
         email: z.string({ required_error: "Email é obrigatório" }).email("Email está inválido"),
         password: z.string({ required_error: "Senha é obrigatória" })
@@ -152,19 +152,84 @@ app.get("/user", async (request, response) => {
 })
 
 
-SocketServer.on('connection', socket => {
-    console.log("socketId =>", socket.id)
+const messagesRequestQuery = z.object({
+    roomId: z.string().optional(),
+})
+app.get("/history/:roomId", async (request, response) => {
+    const { roomId } = messagesRequestQuery.parse(request.params)
 
-    socket.on("message",async (data: messageContentProps) => {
-       await prisma.message.create({
+    if (!roomId) {
+        return response.status(404).json("informe o  id da sala")
+    }
+
+    const messages = await prisma.message.findMany({
+        where: {
+            roomId: roomId,
+        },
+        select: {
+            author: {
+                select: {
+                    username: true,
+                    id: true
+                },
+
+            },
+            id: true,
+            content: true,
+            roomId: true,
+            createdAt: true
+        
+        }
+    })
+
+    const messagesFormatted = messages.map(message => {
+        return {
+            id: message.id,
+            content: message.content,
+            createdAt: message.createdAt,
+            authorUsername: message.author.username,
+            authorId: message.author.id,
+            roomId: message.roomId
+        }
+    })
+
+    return response.json(messagesFormatted)
+
+
+})
+
+
+SocketServer.on('connection', socket => {
+
+    socket.on("message", async (data: messageContentProps) => {
+        const message = await prisma.message.create({
             data: {
                 content: data.message as string,
                 authorId: data.userId as string,
                 roomId: data.roomId as string,
+            },
+            select: {
+                author: {
+                    select: {
+                        username: true,
+                        id: true
+                    },
+                },
+                id: true,
+                content: true,
+                roomId: true,
+                createdAt: true
             }
         })
-        console.log(data)
-        SocketServer?.to(data.roomId).emit("received_message",data)
+        const messagesFormatted = {
+            id: message.id,
+            content: message.content,
+            createdAt: message.createdAt,
+            authorUsername: message.author.username ,
+            authorId: message.author.id,
+            roomId: message.roomId
+        }
+        SocketServer?.to(data.roomId).emit("received_message", messagesFormatted)
     })
 
     socket.on("connectRoom", async (room: roomProps) => {
@@ -181,13 +246,11 @@ SocketServer.on('connection', socket => {
 
         roomId = existingRoom?.id
 
-
-        if(!existingRoom){
-
+        if (!existingRoom) {
             const roomCreated = await prisma.room.create({
                 data: {
                     users: {
-                        connect: [{id: room.userId}, {id: room.friendId}]
+                        connect: [{ id: room.userId }, { id: room.friendId }]
                     }
                 }
             })
@@ -195,15 +258,11 @@ SocketServer.on('connection', socket => {
             roomId = roomCreated?.id
         }
 
-        if(!roomId) return
+        if (!roomId) return
 
         socket.join(roomId);
-        SocketServer.to(roomId).emit('roomCreated', { roomId: roomId});
+        SocketServer.to(roomId).emit('roomCreated', { roomId: roomId });
     })
-
-    
-
-
 })
 
 
