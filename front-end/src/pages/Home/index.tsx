@@ -4,9 +4,11 @@ import { Socket, io } from "socket.io-client"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { useAuth } from "@/hooks/useAuth"
-import { useParams  } from "react-router-dom"
+import { useParams } from "react-router-dom"
+import  dayjs from "dayjs"
 
 import { api } from "@/services/axios"
+import { useSocket } from "@/hooks/useSocket"
 
 
 type paramsProps = {
@@ -32,10 +34,9 @@ export function Home() {
   const [history, setHistory] = useState<historyMessageProps[]>([])
   const params = useParams<paramsProps>()
   const [roomId, setRoomId] = useState<null | string>(null)
-  const {friendId} = params
- 
-  const [socket, setSocket] = useState<Socket | undefined>(undefined)
- 
+  const { friendId } = params
+  const { socket } = useSocket()
+
   const { user } = useAuth()
   const scrollDiv = useRef<HTMLDivElement | null>(null)
 
@@ -52,20 +53,15 @@ export function Home() {
     scrollDiv.current?.scrollIntoView({ behavior: "smooth" })
   }
 
-  async function fetchRoomHistory(roomId: string){
-      const {data} = await api.get<historyMessageProps[]>(`/history/${roomId}`)
-      setHistory(data)
+  async function fetchRoomHistory(roomId: string) {
+    const { data } = await api.get<historyMessageProps[]>(`/history/${roomId}`)
+    setHistory(data)
   }
 
-
-  function connectSocket() {
-    const URL = "http://localhost:3333"
-    const SocketConnection = io(URL, {
-      
-    });
-    setSocket(SocketConnection)
+  function formatDate(Date: string | Date){
+      const dateFormated = dayjs(Date).format("HH[:]mm")
+      return dateFormated
   }
-
 
   function sendMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -85,49 +81,46 @@ export function Home() {
 
   }
 
-  function connectRoom(){
-    if(!friendId || !user?.id) return
+  function connectRoom() {
+    if (!friendId || !user?.id) return
 
     const roomConnection: connectRoomParams = {
-       friendId: friendId,
-       userId: user?.id
+      friendId: friendId,
+      userId: user?.id
     }
-    socket?.emit('connectRoom',roomConnection);
+    socket?.emit('connectRoom', roomConnection);
   }
 
-  socket?.on('roomCreated', ({roomId}: {roomId: string}) => {
+  socket?.on('roomCreated', ({ roomId }: { roomId: string }) => {
     setRoomId(roomId)
     fetchRoomHistory(roomId)
-  });
+    console.log("room created")
+    
+  }); 
 
 
   useEffect(() => {
     socket?.on("received_message", (data: historyMessageProps) => {
       setHistory(state => {
-          const isDuplicateMessage = state.some(message => message.id === data.id)
-          if(isDuplicateMessage) return state
-          return [...state, data]
-        
+        const isDuplicateMessage = state.some(message => message.id === data.id)
+        if (isDuplicateMessage) return state
+        return [...state, data]
+
       })
       scrollDown()
 
-      
+
     })
 
-    return  () => {
+    return () => {
       socket?.off("received_message")
     }
-  },[socket])
-
-  useEffect(() => {
-    connectSocket()
-  }, []);
+  }, [socket])
 
 
   useEffect(() => {
     connectRoom()
-
-  },[roomId,params])
+  }, [params])
 
   return (
 
@@ -143,11 +136,12 @@ export function Home() {
                     {content.authorUsername}
                   </span>
                   <Card
-                    
-                    className={`px-2 py-1 mt-1 flex justify-center rounded-lg items-center w-[max-content] ${content.authorId !== user?.id ? "bg-primary text-gray-200" : "bg-secondary text-zinc-700"} `}
+
+                    className={`px-2 py-1 mt-1 min-w-[100px] flex flex-col justify-center rounded-lg items-center w-[max-content] ${content.authorId !== user?.id ? "bg-primary text-gray-200" : "bg-secondary text-zinc-700"} `}
                   >
 
-                    <span >{content.content}</span>
+                    <span className="block self-start font-medium " >{content.content}</span>
+                    <span className="block self-end text-xs" >{formatDate(content.createdAt)}</span>
                   </Card>
 
                 </div>
@@ -174,7 +168,7 @@ export function Home() {
 
 
         >
-          click here
+          enviar
         </Button>
 
 
