@@ -1,5 +1,6 @@
 import {  USER_LOCALSTORAGE_KEY } from "@/Storage";
 
+
 const userKey = USER_LOCALSTORAGE_KEY;
 
 export function SAVE_USER_IN_LOCAL_STORAGE(user: USER_DTO){
@@ -16,3 +17,9 @@ export function GET_USER_IN_LOCAL_STORAGE(){
 
     return user
 }
+
+export function DELETE_USER_IN_LOCAL_STORAGE(){
+   localStorage.removeItem(userKey)
+}
+
+

@@ -54,7 +54,7 @@ export function Home() {
   }
 
   async function fetchRoomHistory(roomId: string) {
-    const { data } = await api.get<historyMessageProps[]>(`/history/${roomId}`)
+    const { data } = await api.get<historyMessageProps[]>(`/rooms/history/${roomId}`)
     setHistory(data)
   }
 
@@ -126,7 +126,7 @@ export function Home() {
 
 
     <main className="bg-gray-900   flex flex-col ">
-      <section className="overflow-y-auto h-[90vh] pt-4">
+      <section className="overflow-y-auto  pt-4 h-[80vh]">
         <ul className="flex flex-col gap-3   ">
           {
             history.map(content => (
@@ -154,7 +154,7 @@ export function Home() {
 
       </section>
 
-      <form className="mt-auto  flex gap-2 pt-4 h-[10vh] px-4" onSubmit={sendMessage}>
+      <form className=" flex gap-2 pt-4 h-[10vh] px-4 " onSubmit={sendMessage}>
         <Input
           name="message"
           value={messageText}
