@@ -37,6 +37,7 @@ async function GetRoom(request: Request, response: Response) {
 
                             }
                         },
+                        id: true,
                         content: true,
                         createdAt: true
                     }

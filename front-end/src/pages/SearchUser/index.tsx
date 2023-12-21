@@ -24,7 +24,6 @@ export function SearchUser() {
         setUsernameLocalSearch(event.target.value)
     }
 
-
     async function handleFetchUserAvailableForNewConnections() {
         try {
             fetchUserAvailableForNewConnections()
@@ -58,6 +57,7 @@ export function SearchUser() {
             <div className="max-w-[800px] px-2 mt-5 mx-auto pb-10">
                 <form className="flex gap-3">
                     <Input
+                        className="text-gray-300"
                         onChange={handleChangeSearch}
                         placeholder="Digite o nome de usuário"
                     />

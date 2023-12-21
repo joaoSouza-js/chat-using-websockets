@@ -13,7 +13,7 @@ export function Router() {
                 <Route path="/signUp" element={<SignUp />} />
                 <Route path='/searchUser' element={<SearchUser/>} />
                 <Route path='/home' element={<DashboardMessages />}>
-                    <Route path='messages/:friendId' element={<Home />} />
+                    <Route path='messages/:chatId' element={<Home />} />
                 </Route>
             </Routes>
         </BrowserRouter>

@@ -7,6 +7,10 @@ import { userRoutes } from "../routes/user"
 import { PORT } from "../../env"
 import { roomRoutes } from "../routes/room"
 import { messageRoutes } from "../routes/messages"
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+import swaggerOptions from "../swagger"
+
 
 type messageContentProps = {
     userId: string | undefined;
@@ -19,7 +23,6 @@ type roomProps = {
     userId: string,
     friendId: string,
 }
-
 const app = express()
 
 app.use(express.json())
@@ -28,10 +31,12 @@ app.use(cors({
     origin: "*"
 }))
 
+
+const specs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use("/users", userRoutes)
 app.use("/rooms", roomRoutes)
 app.use("/messages", messageRoutes)
-
 
 const ApiServer = http.createServer(app)
 const SocketServer = new socketio.Server(ApiServer, {

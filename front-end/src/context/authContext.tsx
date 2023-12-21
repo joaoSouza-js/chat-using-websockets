@@ -31,8 +31,8 @@ type signUpProps = {
 type AuthContextProps = {
     user: USER_DTO | null,
     logOut: () => void,
-    signIn: ({ }: signInProps) => Promise<void>
-    signUp: ({ }: signUpProps) => Promise<void>
+    signIn: (data: signInProps) => Promise<void>
+    signUp: (data: signUpProps) => Promise<void>
 }
 
 interface AuthContextProviderProps {

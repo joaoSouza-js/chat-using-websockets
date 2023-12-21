@@ -46,7 +46,7 @@ export function SignUp() {
         }
 
 
-        console.log(form)
+   
     }
     return (
         <div className="min-h-screen flex justify-center items-center">

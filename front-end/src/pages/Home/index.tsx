@@ -12,13 +12,23 @@ import { useSocket } from "@/hooks/useSocket"
 
 
 type paramsProps = {
-  friendId: string
+  chatId: string
 }
 
-type connectRoomParams = {
-  userId: string,
-  friendId: string,
+type messageProps = {
+  author: USER_DTO,
+  id: string,
+  content: string;
+  createdAt: string;
 }
+
+type roomInformationResponse = {
+  friend: USER_DTO,
+  messages: messageProps[]
+  
+}
+
+
 
 type historyMessageProps = {
   id: string;
@@ -31,11 +41,14 @@ type historyMessageProps = {
 
 
 export function Home() {
-  const [history, setHistory] = useState<historyMessageProps[]>([])
+  const [history, setHistory] = useState<messageProps[]>([])
+  const [friend, setFriend] = useState<null | USER_DTO>(null)
   const params = useParams<paramsProps>()
   const [roomId, setRoomId] = useState<null | string>(null)
-  const { friendId } = params
+  const { chatId } = params
   const { socket } = useSocket()
+
+  
 
   const { user } = useAuth()
   const scrollDiv = useRef<HTMLDivElement | null>(null)
@@ -53,9 +66,10 @@ export function Home() {
     scrollDiv.current?.scrollIntoView({ behavior: "smooth" })
   }
 
-  async function fetchRoomHistory(roomId: string) {
-    const { data } = await api.get<historyMessageProps[]>(`/rooms/history/${roomId}`)
-    setHistory(data)
+  async function fetchRoomHistory() {
+    const { data } = await api.get<roomInformationResponse>(`/rooms/${chatId}`)
+    setHistory(data.messages)
+    setFriend(data.friend)
   }
 
   function formatDate(Date: string | Date){
@@ -81,67 +95,37 @@ export function Home() {
 
   }
 
-  function connectRoom() {
-    if (!friendId || !user?.id) return
+  useEffect(() =>  {
+    console.log("run this hook")
+    fetchRoomHistory()
+  },[params])
 
-    const roomConnection: connectRoomParams = {
-      friendId: friendId,
-      userId: user?.id
-    }
-    socket?.emit('connectRoom', roomConnection);
-  }
-
-  socket?.on('roomCreated', ({ roomId }: { roomId: string }) => {
-    setRoomId(roomId)
-    fetchRoomHistory(roomId)
-    console.log("room created")
-    
-  }); 
-
-
-  useEffect(() => {
-    socket?.on("received_message", (data: historyMessageProps) => {
-      setHistory(state => {
-        const isDuplicateMessage = state.some(message => message.id === data.id)
-        if (isDuplicateMessage) return state
-        return [...state, data]
-
-      })
-      scrollDown()
-
-
-    })
-
-    return () => {
-      socket?.off("received_message")
-    }
-  }, [socket])
-
-
-  useEffect(() => {
-    connectRoom()
-  }, [params])
+  
 
   return (
 
 
     <main className="bg-gray-900   flex flex-col ">
-      <section className="overflow-y-auto  pt-4 h-[80vh]">
-        <ul className="flex flex-col gap-3   ">
+      <section className="overflow-y-auto  pt-6 h-[80vh]">
+        <div className="text-center">
+          <h1 className="text-gray-300 text-lg "> {friend?.username}</h1>
+
+        </div>
+        <ul className="flex flex-col gap-3 pt-2   ">
           {
-            history.map(content => (
-              <li key={content.id} className={`flex ${content.authorId !== user?.id && "justify-end"} px-4`}>
+            history.map(message => (
+              <li key={message.id} className={`flex ${message.author.id !== user?.id && "justify-end"} px-4`}>
                 <div>
                   <span className="text-gray-300 text-sm">
-                    {content.authorUsername}
+                    {message.author.username}
                   </span>
                   <Card
 
-                    className={`px-2 py-1 mt-1 min-w-[100px] flex flex-col justify-center rounded-lg items-center w-[max-content] ${content.authorId !== user?.id ? "bg-primary text-gray-200" : "bg-secondary text-zinc-700"} `}
+                    className={`px-2 py-1 mt-1 min-w-[100px] flex flex-col justify-center rounded-lg items-center w-[max-content] ${message.author.id !== user?.id ? "bg-primary text-gray-200" : "bg-secondary text-zinc-700"} `}
                   >
 
-                    <span className="block self-start font-medium " >{content.content}</span>
-                    <span className="block self-end text-xs" >{formatDate(content.createdAt)}</span>
+                    <span className="block self-start font-medium " >{message.content}</span>
+                    <span className="block self-end text-xs" >{formatDate(message.createdAt)}</span>
                   </Card>
 
                 </div>

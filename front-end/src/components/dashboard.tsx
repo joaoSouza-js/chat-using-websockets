@@ -36,7 +36,7 @@ export function DashboardMessages() {
                                     key={chatPreview.chatId}
                                     title={`convesar com ${chatPreview.friend.username}`}
                                 >
-                                    <Link to={`/home/messages/${chatPreview.friend.id}`}>
+                                    <Link to={`/home/messages/${chatPreview.chatId}`}>
                                         <Card className="px-2 bg-gray-900 text-gray-200 py-2 ">
                                             <div className="flex justify-between">
                                                 <span className="block">
