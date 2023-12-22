@@ -84,6 +84,15 @@ export function Home() {
   },[params])
 
   useEffect(() => {
+    if(!socket) return 
+
+    socket.emit(`notificationVisualized`, {
+      roomId: chatId
+    })
+
+  },[params])
+
+  useEffect(() => {
     if(!socket) return
     socket.on("received_message", (data: messageProps) => {
       setHistory(state => {

@@ -49,7 +49,6 @@ export function SocketContextProvider({ children }: SocketContextProviderProps) 
 
         if (!socket) return
         socket.on("usersOnline", (data: USER_ONLINE_DTO[]) => {
-            console.log(data)
             setUsersOnline(data)
         })
 

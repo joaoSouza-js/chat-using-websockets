@@ -65,6 +65,10 @@ SocketServer.on('connection', async (socket) => {
         return socket.disconnect()
     }
 
+    socket.on(`notificationVisualized`, (data:{roomId: string}) => {
+        socket.emit(`notificationVisualized/room/${data.roomId}`, {roomId: data.roomId} )
+    })
+
     const userIsAlreadyOnline =  usersOnline.some(user => user.userId === userInformation?.id)
 
     if(userIsAlreadyOnline === false){
@@ -132,14 +136,11 @@ SocketServer.on('connection', async (socket) => {
             content: message.content,
             createdAt: message.createdAt,
         }
+
         SocketServer?.to(data.roomId).emit("received_message", messagesFormatted)
+        SocketServer.to(data.roomId).emit(`notification/roomId/${data.roomId}`,messagesFormatted)
 
-        const friends = message.room.users.filter(user => user.id !== userInformation.id)
-        const friendsId  = friends.map(friend => friend.id)
-
-        for(const friendId of friendsId){
-            SocketServer.to(`${data.roomId}/${friendId}`).emit("newNotification",messagesFormatted)
-        }
+      
 
     })
 
