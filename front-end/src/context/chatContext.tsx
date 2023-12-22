@@ -26,7 +26,6 @@ export function ChatContextProvider({ children }: ChatContextProviderProps) {
     const [chatsPreview, setChatsPreview] = useState<ChatPreview[]>([])
     const [usesAvailableForNewConnection, setUsesAvailableForNewConnection] = useState<USER_DTO[]>([])
 
-
     async function fetchUserChatPreview() {
         try {
             const { data } = await api<ChatPreview[]>('/rooms')

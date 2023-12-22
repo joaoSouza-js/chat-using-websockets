@@ -4,17 +4,26 @@ import { Link, Outlet } from "react-router-dom"
 import { Header } from "@/components/Header"
 import { useChat } from "@/hooks/useChat"
 import { AppError } from "@/services/appError"
+import { useSocket } from "@/hooks/useSocket"
 
 export function DashboardMessages() {
-    const {chatsPreview,fetchUserChatPreview} = useChat()
+    const { chatsPreview, fetchUserChatPreview } = useChat()
+    const { usersOnline } = useSocket()
 
+
+    function checkUserOnlineStatus(userId: string) {
+        const userIsOnline = usersOnline.some(user => user.userId === userId)
+        console.log(userId)
+        return userIsOnline
+    }
+    
     async function fetchChatsPreview() {
         try {
             await fetchUserChatPreview()
         } catch (error) {
             console.error(error)
             const isAppError = error instanceof AppError
-            const errorMessage =  isAppError ? error.error : "Erro no servidor"
+            const errorMessage = isAppError ? error.error : "Erro no servidor"
             window.alert(errorMessage)
         }
     }
@@ -23,21 +32,21 @@ export function DashboardMessages() {
 
     return (
         <div>
-            <Header/>
+            <Header />
             <div className="bg-foreground min-h-screen grid grid-cols-2 ">
-            
+
                 <div className="p-4 overflow-auto">
                     <ul className="flex flex-col gap-4 ">
 
                         {
                             chatsPreview.map(chatPreview => (
 
-                                <li 
+                                <li
                                     key={chatPreview.chatId}
                                     title={`convesar com ${chatPreview.friend.username}`}
                                 >
                                     <Link to={`/home/messages/${chatPreview.chatId}`}>
-                                        <Card className="px-2 bg-gray-900 text-gray-200 py-2 ">
+                                        <Card className="px-4 bg-gray-900 text-gray-200 py-3 relative ">
                                             <div className="flex justify-between">
                                                 <span className="block">
                                                     {chatPreview.friend.username}
@@ -53,6 +62,7 @@ export function DashboardMessages() {
                                                     <span>9</span>
                                                 </div>
                                             </div>
+                                            <div className={`w-5 h-5 ${checkUserOnlineStatus(chatPreview.friend.id) ? "bg-green-500" : "bg-red-400" } rounded-full -top-[10px]  absolute -right-[10px]`}/>
                                         </Card>
 
                                     </Link>

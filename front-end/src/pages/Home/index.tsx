@@ -10,7 +10,6 @@ import  dayjs from "dayjs"
 import { api } from "@/services/axios"
 import { useSocket } from "@/hooks/useSocket"
 
-
 type paramsProps = {
   chatId: string
 }
@@ -28,32 +27,19 @@ type roomInformationResponse = {
   
 }
 
-
-
-type historyMessageProps = {
-  id: string;
-  content: string;
-  createdAt: string;
-  authorId: string;
-  authorUsername: string
-  roomId: string;
-};
-
-
 export function Home() {
   const [history, setHistory] = useState<messageProps[]>([])
   const [friend, setFriend] = useState<null | USER_DTO>(null)
+  const [messageText, setMessageText] = useState('')
+
   const params = useParams<paramsProps>()
-  const [roomId, setRoomId] = useState<null | string>(null)
+
   const { chatId } = params
   const { socket } = useSocket()
-
-  
 
   const { user } = useAuth()
   const scrollDiv = useRef<HTMLDivElement | null>(null)
 
-  const [messageText, setMessageText] = useState('')
 
   const disableSubmitButton = messageText.length < 1
 
@@ -81,10 +67,8 @@ export function Home() {
     event.preventDefault()
     try {
       const messageContent = {
-        userId: user?.id,
         message: messageText,
-        userName: user?.username,
-        roomId: roomId
+        roomId: chatId
       }
       socket?.emit("message", messageContent)
       setMessageText('')
@@ -96,9 +80,22 @@ export function Home() {
   }
 
   useEffect(() =>  {
-    console.log("run this hook")
     fetchRoomHistory()
   },[params])
+
+  useEffect(() => {
+    if(!socket) return
+    socket.on("received_message", (data: messageProps) => {
+      setHistory(state => {
+       return [...state, data]
+      })
+    })
+
+    return () => {
+      socket.off("received_message")
+    }
+    
+  }, [socket])
 
   
 
