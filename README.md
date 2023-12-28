@@ -72,8 +72,15 @@ Certainly! Below are the installation and running steps for both the front-end a
    ```bash
    pnpm install
    ```
+2. **Set BaseUrl in .env File:**
+   - Create a `.env` file in the root of your project.
+   - Add the following line to set your BaseUrl (you can change the value to your desired BaseUrl):
+     ```
+     BASE_URL="http://localhost:3333"
 
-2. **Run the Project:**
+     ```
+
+3. **Run the Project:**
    ```bash
    pnpm run dev
    ```
