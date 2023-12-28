@@ -10,7 +10,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
+import { useToast } from "@/components/ui/use-toast"
+import { Toaster     } from "@/components/ui/toaster"
 
 const SignInSchema = z.object({
     email: z.string({ required_error: "Email é obrigatório" }).email("Email está inválido"),
@@ -22,6 +23,7 @@ type SignInSchemaData = z.input<typeof SignInSchema>
 export function SignIn() {
     const {signIn} = useAuth()
     const navigate = useNavigate()
+    const {toast} = useToast()
 
     const { formState, handleSubmit, register } = useForm<SignInSchemaData>({
         resolver: zodResolver(SignInSchema)
@@ -39,7 +41,11 @@ export function SignIn() {
         } catch (error) {
             const isAppError = error instanceof AppError
             const errorMessage = isAppError ? error.error : "error no servidor"
-            window.alert(errorMessage)
+            toast({
+               
+                title: errorMessage,
+                variant: "destructive"
+            })
         }
     }
 
@@ -75,7 +81,7 @@ export function SignIn() {
                                 <span className="text-sm text-muted-foreground inline-block font-semibold">Senha</span>
                                 <Input
                                     {...register("password")}
-
+                                    type="password"
                                     className="mt-1"
                                     placeholder="Digite a sua senha"
 
@@ -120,6 +126,7 @@ export function SignIn() {
                 </Card>
 
             </form>
+            <Toaster/>
         </div>
     )
 }

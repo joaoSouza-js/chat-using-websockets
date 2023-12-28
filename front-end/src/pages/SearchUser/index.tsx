@@ -6,6 +6,8 @@ import { AppError } from "@/services/appError"
 import { ChangeEvent, useEffect, useState } from "react"
 import { Search, Plus } from 'lucide-react';
 import { Card } from "@/components/ui/card"
+import { useToast } from "@/components/ui/use-toast"
+import { Toaster     } from "@/components/ui/toaster"
 
 type AddNewFriendProps = {
     friendId: string,
@@ -15,7 +17,7 @@ type AddNewFriendProps = {
 export function SearchUser() {
     const { usesAvailableForNewConnection, fetchUserAvailableForNewConnections, createNewRoom } = useChat()
     const [usernameLocalSearch, setUsernameLocalSearch] = useState("")
-
+    const {toast} = useToast()
     const usesAvailableForNewConnectionFiltered = usesAvailableForNewConnection.filter(user => {
         return user.username.includes(usernameLocalSearch)
     })
@@ -31,14 +33,22 @@ export function SearchUser() {
         } catch (error) {
             const isAppError = error instanceof AppError
             const errorMessage = isAppError ? error.error : "Erro no servidor"
-            window.alert(errorMessage)
+            toast({
+                title: errorMessage,
+                variant: "destructive"
+            })
+            setUsernameLocalSearch("")
         }
     }
 
     async function handleAddNewFriend({ friendId, userName }: AddNewFriendProps) {
         try {
             await createNewRoom(friendId)
-            window.alert(`agora voce pode converar com ${userName}`)
+            toast({
+                title: `agora voce pode converar com ${userName}`,
+                className: "bg-gray-900 text-gray-200 "
+            })
+          
         } catch (error) {
             const isAppError = error instanceof AppError
             const errorMessage = isAppError ? error.error : "Erro no servidor"
@@ -102,6 +112,7 @@ export function SearchUser() {
                 </ul>
 
             </div>
+            <Toaster /> 
         </div>
     )
 }

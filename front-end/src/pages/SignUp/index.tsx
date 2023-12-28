@@ -9,6 +9,8 @@ import { AppError } from "@/services/appError";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 const newUserSchema = z.object({
     email: z.string({ required_error: "Email é obrigatório" }).email("Email está inválido"),
@@ -24,6 +26,8 @@ type newUserSchemaData = z.input<typeof newUserSchema>
 
 export function SignUp() {
     const { signUp } = useAuth()
+    const {toast} = useToast()
+
     const navigation = useNavigate()
     const { formState, handleSubmit, register } = useForm<newUserSchemaData>({
         resolver: zodResolver(newUserSchema)
@@ -42,11 +46,12 @@ export function SignUp() {
         } catch (error) {
             const isAppError = error instanceof AppError
             const errorMessage = isAppError ? error.error : "Algo de errado com o servidor"
-            window.alert(errorMessage)
+            toast({
+                title: errorMessage,
+                variant: "destructive"
+            })
         }
 
-
-   
     }
     return (
         <div className="min-h-screen flex justify-center items-center">
@@ -97,6 +102,7 @@ export function SignUp() {
                                 <span className="text-sm text-muted-foreground inline-block font-semibold">Senha</span>
                                 <Input
                                     className="mt-1"
+                                    type="password"
                                     {...register("password")}
                                     placeholder="Digite a sua senha"
 
@@ -129,6 +135,7 @@ export function SignUp() {
                 </Card>
 
             </form>
+            <Toaster/>
         </div>
     )
 }
