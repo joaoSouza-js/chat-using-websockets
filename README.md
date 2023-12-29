@@ -166,5 +166,5 @@ These steps cover the setup and running of the back-end project using three diff
 These steps cover the installation of dependencies, running the projects, and applying Prisma migrations for the back-end. Users can choose their preferred package manager (npm, yarn, or pnpm) based on their workflow preferences. If you encounter any issues or have questions, feel free to ask for further assistance! 🚀
 
 #Observations
-the api documentation is avaliable in http://localhost:Port
+the api documentation is avaliable in http://localhost:yourPort/api-docs/
 ![chat-photo-02](https://github.com/joaoSouza-js/chat-using-websockets/assets/84108989/038c157f-1d9a-4ada-82de-9c63c4dc74e3)
